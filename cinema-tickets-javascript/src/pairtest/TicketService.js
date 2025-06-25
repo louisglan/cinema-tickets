@@ -11,6 +11,8 @@ export default class TicketService {
 Assumptions:
 Only one ticket type request can be made per purchase
 One adult can only seat one child on their lap
+Cinema is infinitely big
+There will always be at least one ticketTypeRequest
 */
   purchaseTickets(accountId, ...ticketTypeRequests) {
     this.#validateTicketRequests(ticketTypeRequests)
