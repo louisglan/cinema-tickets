@@ -1,3 +1,4 @@
+import InvalidPurchaseException from "../src/pairtest/lib/InvalidPurchaseException";
 import TicketTypeRequest from "../src/pairtest/lib/TicketTypeRequest";
 import TicketService from "../src/pairtest/TicketService"
 import TicketPaymentService from "../src/thirdparty/paymentgateway/TicketPaymentService"
@@ -54,6 +55,25 @@ test("One adult, two children and an infant makes payment of £55 and reserves t
     ticketService.purchaseTickets(ACCOUNT_ID, adultTicketRequest, childTicketRequest, infantTicketRequest)
     expect(mockMakePaymentMethod()).toHaveBeenCalledWith(ACCOUNT_ID, 55)
     expect(mockReserveSeatMethod()).toHaveBeenCalledWith(ACCOUNT_ID, 3)
+})
+
+test("25 tickets is does not throw exception", () => {
+    const adultTicketRequest = new TicketTypeRequest(ADULT, 25)
+    ticketService.purchaseTickets(ACCOUNT_ID, adultTicketRequest)
+    expect(mockMakePaymentMethod()).toHaveBeenCalledTimes(1)
+    expect(mockReserveSeatMethod()).toHaveBeenCalledTimes(1)
+})
+
+test("More than 25 tickets throws exception", () => {
+    const adultTicketRequest = new TicketTypeRequest(ADULT, 26)
+    expect(() => {
+        try {
+            ticketService.purchaseTickets(ACCOUNT_ID, adultTicketRequest)
+        } catch (error) {
+            expect(error.message).toEqual("Cannot purchase more than 25 tickets")
+            throw error
+        }
+    }).toThrow(InvalidPurchaseException)
 })
 
 function mockMakePaymentMethod() {

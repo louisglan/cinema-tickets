@@ -11,10 +11,18 @@ export default class TicketService {
    */
 
   purchaseTickets(accountId, ...ticketTypeRequests) {
+    this.#validateTicketCount(ticketTypeRequests)
     const totalCost = this.#sumTicketRequests(ticketTypeRequests)
     const totalSeats = this.#sumSeats(ticketTypeRequests)
     this.#ticketPaymentService.makePayment(accountId, totalCost)
     this.#seatReservationService.reserveSeat(accountId, totalSeats)
+  }
+
+  #validateTicketCount(ticketRequests) {
+    const ticketSum = ticketRequests.reduce((acc, ticketRequest) => {
+      return acc + ticketRequest.getNoOfTickets()
+    }, 0)
+    if (ticketSum > 25) throw new InvalidPurchaseException("Cannot purchase more than 25 tickets")
   }
 
   #sumTicketRequests(ticketRequests) {
