@@ -26,7 +26,10 @@ export default class TicketService {
   }
 
   #sumSeats(ticketRequests) {
-    return ticketRequests.reduce((acc, ticketRequest) => acc + ticketRequest.getNoOfTickets(), 0)
+    return ticketRequests.reduce((acc, ticketRequest) => {
+      if (ticketRequest.getTicketType() === 'INFANT') return acc
+      return acc + ticketRequest.getNoOfTickets()
+    }, 0)
   }
 
   #getCostFromTicketType(ticketType) {

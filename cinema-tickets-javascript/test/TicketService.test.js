@@ -47,6 +47,15 @@ test("One adult and one infant ticket makes payment of £30 and reserves one sea
     expect(mockReserveSeatMethod()).toHaveBeenCalledWith(ACCOUNT_ID, 1)
 })
 
+test("One adult, two children and an infant makes payment of £55 and reserves three seats", () => {
+    const adultTicketRequest = new TicketTypeRequest(ADULT, 1)
+    const childTicketRequest = new TicketTypeRequest(CHILD, 2)
+    const infantTicketRequest = new TicketTypeRequest(INFANT, 1)
+    ticketService.purchaseTickets(ACCOUNT_ID, adultTicketRequest, childTicketRequest, infantTicketRequest)
+    expect(mockMakePaymentMethod()).toHaveBeenCalledWith(ACCOUNT_ID, 55)
+    expect(mockReserveSeatMethod()).toHaveBeenCalledWith(ACCOUNT_ID, 3)
+})
+
 function mockMakePaymentMethod() {
     const mockTicketPaymentServiceInstance = TicketPaymentService.mock.instances[0];
     return mockTicketPaymentServiceInstance.makePayment;
