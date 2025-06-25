@@ -3,14 +3,19 @@ import TicketService from "../src/pairtest/TicketService"
 import TicketPaymentService from "../src/thirdparty/paymentgateway/TicketPaymentService"
 import SeatReservationService from "../src/thirdparty/seatbooking/SeatReservationService";
 
-const ticketService = new TicketService;
 const ADULT = 'ADULT'
 const CHILD = 'CHILD'
 const INFANT = 'INFANT'
 const ACCOUNT_ID = 999999
+let ticketService;
 
 jest.mock("../src/thirdparty/paymentgateway/TicketPaymentService")
 jest.mock("../src/thirdparty/seatbooking/SeatReservationService")
+
+beforeEach(() => {
+    jest.clearAllMocks()
+    ticketService = new TicketService;
+})
 
 test("One adult ticket makes payment of £25 and reserves one seat", () => {
     const adultTicketRequest = new TicketTypeRequest(ADULT, 1)
