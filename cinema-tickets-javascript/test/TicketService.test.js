@@ -11,13 +11,23 @@ const ACCOUNT_ID = 999999
 jest.mock("../src/thirdparty/paymentgateway/TicketPaymentService")
 jest.mock("../src/thirdparty/seatbooking/SeatReservationService")
 
-test("One adult ticket makes payment of £25 and Reserves one Seat", () => {
+test("One adult ticket makes payment of £25 and reserves one seat", () => {
     const adultTicketRequest = new TicketTypeRequest(ADULT, 1)
     ticketService.purchaseTickets(ACCOUNT_ID, adultTicketRequest)
     const mockMakePayment = mockMakePaymentMethod()
     const mockReserveSeat = mockReserveSeatMethod()
     expect(mockMakePayment).toHaveBeenCalledWith(ACCOUNT_ID, 25)
     expect(mockReserveSeat).toHaveBeenCalledWith(ACCOUNT_ID, 1)
+})
+
+test("Two adult tickets makes payment of £50 and reserves two seats", () => {
+    const adultTicketRequest = new TicketTypeRequest(ADULT, 2)
+    ticketService.purchaseTickets(ACCOUNT_ID, adultTicketRequest)
+    const mockMakePayment = mockMakePaymentMethod()
+    const mockReserveSeat = mockReserveSeatMethod()
+    expect(mockMakePayment).toHaveBeenCalledWith(ACCOUNT_ID, 50)
+    expect(mockReserveSeat).toHaveBeenCalledWith(ACCOUNT_ID, 2)
+
 })
 
 function mockMakePaymentMethod() {

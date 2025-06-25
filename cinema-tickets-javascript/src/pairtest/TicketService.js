@@ -11,8 +11,22 @@ export default class TicketService {
    */
 
   purchaseTickets(accountId, ...ticketTypeRequests) {
-    this.#ticketPaymentService.makePayment(accountId, this.#getCostFromTicketType(ticketTypeRequests[0].getTicketType()))
-    this.#seatReservationService.reserveSeat(accountId, ticketTypeRequests[0].getNoOfTickets())
+    const totalCost = this.#sumTicketRequests(ticketTypeRequests)
+    const totalSeats = this.#sumSeats(ticketTypeRequests)
+    this.#ticketPaymentService.makePayment(accountId, totalCost)
+    this.#seatReservationService.reserveSeat(accountId, totalSeats)
+  }
+
+  #sumTicketRequests(ticketRequests) {
+    return ticketRequests.reduce((acc, ticketRequest) => {
+        const ticketTypeCount = ticketRequest.getNoOfTickets()
+        const ticketTypeCost = this.#getCostFromTicketType(ticketRequest.getTicketType())
+        return acc + ticketTypeCount * ticketTypeCost
+      }, 0)
+  }
+
+  #sumSeats(ticketRequests) {
+    return ticketRequests.reduce((acc, ticketRequest) => acc + ticketRequest.getNoOfTickets(), 0)
   }
 
   #getCostFromTicketType(ticketType) {
