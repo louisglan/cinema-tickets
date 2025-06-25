@@ -76,6 +76,19 @@ test("More than 25 tickets throws exception", () => {
     }).toThrow(InvalidPurchaseException)
 })
 
+test("More than 25 tickets across multiple ticket types throws exception", () => {
+    const adultTicketRequest = new TicketTypeRequest(ADULT, 25)
+    const childTicketRequest = new TicketTypeRequest(CHILD, 1)
+    expect(() => {
+        try {
+            ticketService.purchaseTickets(ACCOUNT_ID, adultTicketRequest, childTicketRequest)
+        } catch (error) {
+            expect(error.message).toEqual("Cannot purchase more than 25 tickets")
+            throw error
+        }
+    }).toThrow(InvalidPurchaseException)
+})
+
 function mockMakePaymentMethod() {
     const mockTicketPaymentServiceInstance = TicketPaymentService.mock.instances[0];
     return mockTicketPaymentServiceInstance.makePayment;
