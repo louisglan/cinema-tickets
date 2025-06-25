@@ -14,6 +14,7 @@ One adult can only seat one child on their lap
 */
   purchaseTickets(accountId, ...ticketTypeRequests) {
     this.#validateTicketRequests(ticketTypeRequests)
+    this.#validateAccountId(accountId)
     const totalCost = this.#sumTicketRequests(ticketTypeRequests)
     const totalSeats = this.#sumSeats(ticketTypeRequests)
     this.#ticketPaymentService.makePayment(accountId, totalCost)
@@ -55,6 +56,10 @@ One adult can only seat one child on their lap
       ticketCount = tickets[0].getNoOfTickets()
     }
     return ticketCount
+  }
+
+  #validateAccountId(accountId) {
+    if (accountId <= 0) throw new InvalidPurchaseException("Account ID must be greater than zero")
   }
 
   #sumTicketRequests(ticketRequests) {

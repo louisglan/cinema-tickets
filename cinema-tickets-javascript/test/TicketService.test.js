@@ -126,6 +126,30 @@ test("Infant tickets must not exceed adult tickets", () => {
     }).toThrow(InvalidPurchaseException)
 })
 
+test("Account IDs must not be zero", () => {
+    const adultTicketRequest = new TicketTypeRequest(ADULT, 1)
+    expect(() => {
+        try {
+            ticketService.purchaseTickets(0, adultTicketRequest)
+        } catch (error) {
+            expect(error.message).toEqual("Account ID must be greater than zero")
+            throw error
+        }
+    }).toThrow(InvalidPurchaseException)
+})
+
+test("Account IDs must not be negative", () => {
+    const adultTicketRequest = new TicketTypeRequest(ADULT, 1)
+    expect(() => {
+        try {
+            ticketService.purchaseTickets(-1, adultTicketRequest)
+        } catch (error) {
+            expect(error.message).toEqual("Account ID must be greater than zero")
+            throw error
+        }
+    }).toThrow(InvalidPurchaseException)
+})
+
 function mockMakePaymentMethod() {
     const mockTicketPaymentServiceInstance = TicketPaymentService.mock.instances[0];
     return mockTicketPaymentServiceInstance.makePayment;
