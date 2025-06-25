@@ -12,6 +12,7 @@ export default class TicketService {
 
   purchaseTickets(accountId, ...ticketTypeRequests) {
     this.#validateTicketCount(ticketTypeRequests)
+    this.#validateAdultIsPresent(ticketTypeRequests)
     const totalCost = this.#sumTicketRequests(ticketTypeRequests)
     const totalSeats = this.#sumSeats(ticketTypeRequests)
     this.#ticketPaymentService.makePayment(accountId, totalCost)
@@ -23,6 +24,12 @@ export default class TicketService {
       return acc + ticketRequest.getNoOfTickets()
     }, 0)
     if (ticketSum > 25) throw new InvalidPurchaseException("Cannot purchase more than 25 tickets")
+  }
+
+  #validateAdultIsPresent(ticketRequests) {
+    if (ticketRequests.filter(ticketRequest => ticketRequest.getTicketType() == 'ADULT').length === 0) {
+      throw new InvalidPurchaseException("At least one adult ticket must be purchased")
+    }
   }
 
   #sumTicketRequests(ticketRequests) {

@@ -89,6 +89,30 @@ test("More than 25 tickets across multiple ticket types throws exception", () =>
     }).toThrow(InvalidPurchaseException)
 })
 
+test("Child tickets cannot be purchased on their own", () => {
+    const childTicketRequest = new TicketTypeRequest(CHILD, 1)
+    expect(() => {
+        try {
+            ticketService.purchaseTickets(ACCOUNT_ID, childTicketRequest)
+        } catch (error) {
+            expect(error.message).toEqual("At least one adult ticket must be purchased")
+            throw error
+        }
+    }).toThrow(InvalidPurchaseException)
+})
+
+test("Infant tickets cannot be purchased on their own", () => {
+    const infantTicketRequest = new TicketTypeRequest(INFANT, 1)
+    expect(() => {
+        try {
+            ticketService.purchaseTickets(ACCOUNT_ID, infantTicketRequest)
+        } catch (error) {
+            expect(error.message).toEqual("At least one adult ticket must be purchased")
+            throw error
+        }
+    }).toThrow(InvalidPurchaseException)
+})
+
 function mockMakePaymentMethod() {
     const mockTicketPaymentServiceInstance = TicketPaymentService.mock.instances[0];
     return mockTicketPaymentServiceInstance.makePayment;
