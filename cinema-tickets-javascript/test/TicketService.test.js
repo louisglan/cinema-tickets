@@ -113,6 +113,19 @@ test("Infant tickets cannot be purchased on their own", () => {
     }).toThrow(InvalidPurchaseException)
 })
 
+test("Infant tickets must not exceed adult tickets", () => {
+    const infantTicketRequest = new TicketTypeRequest(INFANT, 2)
+    const adultTicketRequest = new TicketTypeRequest(ADULT, 1)
+    expect(() => {
+        try {
+            ticketService.purchaseTickets(ACCOUNT_ID, infantTicketRequest, adultTicketRequest)
+        } catch (error) {
+            expect(error.message).toEqual("There should be at least one adult per infant. An adult should not have two or more infants on their lap")
+            throw error
+        }
+    }).toThrow(InvalidPurchaseException)
+})
+
 function mockMakePaymentMethod() {
     const mockTicketPaymentServiceInstance = TicketPaymentService.mock.instances[0];
     return mockTicketPaymentServiceInstance.makePayment;

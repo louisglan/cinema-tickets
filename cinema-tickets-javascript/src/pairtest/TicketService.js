@@ -6,17 +6,24 @@ import SeatReservationService from '../thirdparty/seatbooking/SeatReservationSer
 export default class TicketService {
   #ticketPaymentService = new TicketPaymentService()
   #seatReservationService = new SeatReservationService()
-  /**
-   * Should only have private methods other than the one below.
-   */
 
+/*
+Assumptions:
+Only one ticket type request can be made per purchase
+One adult can only seat one child on their lap
+*/
   purchaseTickets(accountId, ...ticketTypeRequests) {
-    this.#validateTicketCount(ticketTypeRequests)
-    this.#validateAdultIsPresent(ticketTypeRequests)
+    this.#validateTicketRequests(ticketTypeRequests)
     const totalCost = this.#sumTicketRequests(ticketTypeRequests)
     const totalSeats = this.#sumSeats(ticketTypeRequests)
     this.#ticketPaymentService.makePayment(accountId, totalCost)
     this.#seatReservationService.reserveSeat(accountId, totalSeats)
+  }
+
+  #validateTicketRequests(ticketRequests) {
+    this.#validateTicketCount(ticketRequests)
+    this.#validateAdultIsPresent(ticketRequests)
+    this.#validateInfantsDoNotExceedAdults(ticketRequests)
   }
 
   #validateTicketCount(ticketRequests) {
@@ -30,6 +37,24 @@ export default class TicketService {
     if (ticketRequests.filter(ticketRequest => ticketRequest.getTicketType() == 'ADULT').length === 0) {
       throw new InvalidPurchaseException("At least one adult ticket must be purchased")
     }
+  }
+
+  #validateInfantsDoNotExceedAdults(ticketRequests) {
+    const infantTickets = ticketRequests.filter(ticketRequest => ticketRequest.getTicketType() == 'INFANT')
+    const adultTickets = ticketRequests.filter(ticketRequest => ticketRequest.getTicketType() == 'ADULT')
+    const infantTicketCount = this.#getTicketCountFromSingleTicketType(infantTickets)
+    const adultTicketCount = this.#getTicketCountFromSingleTicketType(adultTickets)
+    if (infantTicketCount > adultTicketCount) throw new InvalidPurchaseException("There should be at least one adult per infant. An adult should not have two or more infants on their lap")
+  }
+
+  #getTicketCountFromSingleTicketType(tickets) {
+    let ticketCount
+    if (tickets.length == 0) {
+      ticketCount = 0
+    } else {
+      ticketCount = tickets[0].getNoOfTickets()
+    }
+    return ticketCount
   }
 
   #sumTicketRequests(ticketRequests) {
