@@ -4,6 +4,9 @@ import TicketPaymentService from '../thirdparty/paymentgateway/TicketPaymentServ
 import SeatReservationService from '../thirdparty/seatbooking/SeatReservationService.js';
 
 export default class TicketService {
+  #ADULT = 'ADULT'
+  #INFANT = 'INFANT'
+
   #ticketPaymentService = new TicketPaymentService()
   #seatReservationService = new SeatReservationService()
 
@@ -37,27 +40,30 @@ There will always be at least one ticketTypeRequest
   }
 
   #validateAdultIsPresent(ticketRequests) {
-    if (ticketRequests.filter(ticketRequest => ticketRequest.getTicketType() == 'ADULT').length === 0) {
+    const hasAdultTickets = ticketRequests.filter(ticketRequest => this.#isAdult(ticketRequest)).length > 0
+    if (!hasAdultTickets) {
       throw new InvalidPurchaseException("At least one adult ticket must be purchased")
     }
   }
 
+  #isAdult(ticketRequest) {
+    return ticketRequest.getTicketType() == this.#ADULT
+  }
+
+  #isInfant(ticketRequest) {
+    return ticketRequest.getTicketType() == this.#INFANT
+  }
+
   #validateInfantsDoNotExceedAdults(ticketRequests) {
-    const infantTickets = ticketRequests.filter(ticketRequest => ticketRequest.getTicketType() == 'INFANT')
-    const adultTickets = ticketRequests.filter(ticketRequest => ticketRequest.getTicketType() == 'ADULT')
+    const infantTickets = ticketRequests.filter(ticketRequest => this.#isInfant(ticketRequest))
+    const adultTickets = ticketRequests.filter(ticketRequest => this.#isAdult(ticketRequest))
     const infantTicketCount = this.#getTicketCountFromSingleTicketType(infantTickets)
     const adultTicketCount = this.#getTicketCountFromSingleTicketType(adultTickets)
     if (infantTicketCount > adultTicketCount) throw new InvalidPurchaseException("There should be at least one adult per infant. An adult should not have two or more infants on their lap")
   }
 
   #getTicketCountFromSingleTicketType(tickets) {
-    let ticketCount
-    if (tickets.length == 0) {
-      ticketCount = 0
-    } else {
-      ticketCount = tickets[0].getNoOfTickets()
-    }
-    return ticketCount
+    return tickets.length == 0 ? 0 : tickets[0].getNoOfTickets()
   }
 
   #validateAccountId(accountId) {
@@ -74,7 +80,7 @@ There will always be at least one ticketTypeRequest
 
   #sumSeats(ticketRequests) {
     return ticketRequests.reduce((acc, ticketRequest) => {
-      if (ticketRequest.getTicketType() === 'INFANT') return acc
+      if (this.#isInfant(ticketRequest)) return acc
       return acc + ticketRequest.getNoOfTickets()
     }, 0)
   }
